@@ -6,7 +6,7 @@
 //------------------------------------
 //	01. FUNCTION create_new_game
 //------------------------------------
-game* create_new_game(char* p1, char* p2, int connect, int rows, int columns) {
+game* create_new_game(char* p1, char* p2) {
 	//1. We create the variable for hosting the game
 	game* g = (game*)malloc(1 * sizeof(game));
 
@@ -28,22 +28,12 @@ game* create_new_game(char* p1, char* p2, int connect, int rows, int columns) {
 	//4. We set the status to be 1; i.e., player1 moves first
 	(*g).status = 1;
 
-	//5. We initialise the connect, rows and columns
-	(*g).connect = connect;
-	(*g).rows = rows;
-	(*g).columns = columns;
-
-	//6. We initialise the board to contain all positions empty
-	(*g).board = (char**)malloc(rows * sizeof(char*));
-	(*g).board[0] = (char*)malloc((rows * columns) * sizeof(char));
-	for (int i = 0; i < rows; i++)
-		(*g).board[i] = (*g).board[0] + (columns * i);
-
-	for (int i = 0; i < rows; i++)
-		for (int j = 0; j < columns; j++)
+	//5. We initialise the board to contain all positions empty
+	for (int i = 0; i < ROWS; i++)
+		for (int j = 0; j < COLUMNS; j++)
 			(*g).board[i][j] = ' ';
 
-	//7. We return the game
+	//6. We return the game
 	return g;
 }
 
@@ -53,49 +43,31 @@ game* create_new_game(char* p1, char* p2, int connect, int rows, int columns) {
 void display_board(game* g) {
 	int row;
 	int col;
-	int i = 0;
-	printf("\n\n ****CONNECT 4 GAME****\n");
+	printf("\n\n ****CONNECT 4 GAME****");
+	printf("\n\n  1   2   3   4   5   6   7\n");
 
-	for (i = 0; i < (*g).columns; i++)
+	for (row = 0; row < ROWS; row++)
 	{
-		printf("  %d ", i + 1);
-	}
-	printf("\n+");
-
-	for (int j = 0; j < (*g).columns; j++)
-	{
-		printf("---+");
-	}
-
-	for (row = 0; row < (*g).rows; row++)
-	{
-		printf("\n", row);
-		for (col = 0; col < (*g).columns; col++)
+		printf("+---+---+---+---+---+---+---+\n", row);
+		for (col = 0; col < COLUMNS; col++)
 		{
 			printf("| %c ", (*g).board[row][col]);
-			if (col == ((*g).columns - 1))
-			{
-				printf("|\n");
-				printf("+");
-				for (i = 0; i < (*g).columns; i++)
-				{
-					printf("---+");
-				}
-			}
 		}
+		printf("|\n");
 	}
+	printf("+---+---+---+---+---+---+---+");
 }
 
 //------------------------------------
 //	03. FUNCTION display_game_status 
 //------------------------------------
-void display_game_status(game* g)
+void display_game_status(game* g) 
 {
 	if ((*g).status == 1)
 	{
 		printf("\n%s, your turn next", (*g).p1);
 	}
-
+	
 	else if ((*g).status == 2)
 	{
 		printf("\n%s, your turn next", (*g).p2);
@@ -150,21 +122,20 @@ char my_get_char() {
 //------------------------------------
 int ask_for_column(game* g) {
 	char in = ' ';
-	int x = 0;
 
 	do {
 		if ((*g).status == 1)
 		{
-			printf("\n%s, please enter a column: ", (*g).p1);
+			printf("\n%s, please enter a column: ", (*g).p1); 
 		}
 		else if ((*g).status == 2)
 		{
 			printf("\n%s, please enter a column: ", (*g).p2);
 		}
 		in = my_get_char();
-		x = in - '0';
-	} 
-	while ((x > (*g).columns) || (x < 1) || (in == "\n") || (in == ' '));
+	} while ((in != '0') && (in != '1') && (in != '2') && (in != '3') && (in != '4') && (in != '5') && (in != '6') && (in != '7'));
+
+	int x = in - '0';
 	return x;
 }
 
@@ -174,12 +145,11 @@ int ask_for_column(game* g) {
 void user_movement(game* g, int* r, int* c) {
 	*r = -1;
 	*c = -1;
-
+	
 	int input = 0;
 	char p1 = 'X';
 	char p2 = 'O';
-	int i = ((*g).rows - 1);
-	//int i = 5;
+	int i = 5;
 
 	input = ask_for_column(g);
 	while (i >= 0)
@@ -187,12 +157,11 @@ void user_movement(game* g, int* r, int* c) {
 		if ((*g).status == 1)
 		{
 			if ((*g).board[i][input - 1] == ' ')
-
 			{
 				((*g).board[i][input - 1]) = p1;
 				*r = i;
 				*c = input - 1;
-
+		
 				i = -1;
 			}
 		}
@@ -219,22 +188,22 @@ void computer_movement(game* g, int* r, int* c) {
 	*r = -1;
 	*c = -1;
 
-	int input;
+	int input = 0;
 	char p1 = 'X';
 	char p2 = 'O';
-	int i = ((*g).rows - 1);
+	int i = 5;
 
-	input = rand() % ((*g).columns);
+	input = rand() % 7 + 1;
 
 	while (i >= 0)
 	{
 		if ((*g).status == 1)
 		{
-			if ((*g).board[i][input] == ' ')
+			if ((*g).board[i][input - 1] == ' ')
 			{
-				((*g).board[i][input]) = p1;
+				((*g).board[i][input - 1]) = p1;
 				*r = i;
-				*c = input;
+				*c = input - 1;
 
 				i = -1;
 			}
@@ -242,11 +211,11 @@ void computer_movement(game* g, int* r, int* c) {
 
 		else if ((*g).status == 2)
 		{
-			if ((*g).board[i][input] == ' ')
+			if ((*g).board[i][input - 1] == ' ')
 			{
-				((*g).board[i][input]) = p2;
+				((*g).board[i][input - 1]) = p2;
 				*r = i;
-				*c = input;
+				*c = input - 1;
 
 				i = -1;
 			}
@@ -277,7 +246,7 @@ void new_movement(game* g, int* r, int* c) {
 				user_movement(g, r, c);
 				if ((*r != -1) && (*c != -1))
 					validMovement = True;
-			}
+			}	
 		}
 	}
 
@@ -346,13 +315,13 @@ bool winning_column(game* g, int column, int ply) //vertical
 		}
 		i--;
 	}
-	return checkColumn;
+
 }
 
 //------------------------------------
 //	11. FUNCTION winning_diagonal 
 //------------------------------------
-bool winning_diagonal(game* g, int diagonal, int ply, bool left)
+bool winning_diagonal(game* g, int diagonal, int ply, bool left) 
 {
 	return False;
 }
@@ -360,37 +329,35 @@ bool winning_diagonal(game* g, int diagonal, int ply, bool left)
 //------------------------------------
 //	12. FUNCTION winning_player 
 //------------------------------------
-bool winning_player(game* g, int ply)
+bool winning_player(game* g, int ply) 
 {
 	/*bool finish = False;
 	checkCol = winning_column(g, column, ply);
 	if (checkCol == True)
 	{
-	finish = True;
+		finish = True;
 	}
 	return finish;*/
-	return False;
 }
 
 //------------------------------------
 //	13. FUNCTION update_status 
 //------------------------------------
-void update_status(game* g, bool finish, int movs)
+void update_status(game* g, bool finish, int movs) 
 {
-	//int movs = 0;
 	if ((*g).status == 1)
 	{
 		if (finish == False)
 		{
 			(*g).status = 2;
 
-			if (movs == (*g).columns * (*g).rows)
+			if (movs == 42)
 			{
 				(*g).status = 5;
 			}
 		}
 
-		else
+		else 
 		{
 			(*g).status = 3;
 		}
@@ -403,7 +370,7 @@ void update_status(game* g, bool finish, int movs)
 
 			(*g).status = 1;
 
-			if (movs == (*g).columns * (*g).rows)
+			if (movs == 42)
 			{
 				(*g).status = 5;
 			}
@@ -419,11 +386,9 @@ void update_status(game* g, bool finish, int movs)
 //------------------------------------
 //	14. FUNCTION play_game 
 //------------------------------------
-//void play_game(char* p1, char* p2)
-void play_game(int connect, int rows, int columns, char* p1, char* p2)
+void play_game(char* p1, char* p2)
 {
-	//game* mygame = create_new_game(p1, p2);
-	game* mygame = create_new_game(p1, p2, connect, rows, columns);
+	game* mygame = create_new_game(p1, p2);
 
 	bool finish = False;
 	int pos_x = 0;
@@ -438,20 +403,19 @@ void play_game(int connect, int rows, int columns, char* p1, char* p2)
 		display_game_status(mygame);
 
 		//while ((pos_x != -1) && (pos_y != -1))
-
+		
 		//2. Modifies the status
 		//2.1. Ask for a new valid movement 
 		new_movement(mygame, &pos_x, &pos_y);
 		movements++;
 
 		//2.2. Check if the new movement ends the game
-		finish = winning_player(mygame, (*mygame).status, pos_x, pos_y);
-
+		//finish = winning_player(mygame, (*mygame).status, pos_x, pos_y);
+		
 		//2.3. Update the status of the game
 		update_status(mygame, finish, movements);
 
-		//if (movements == 42)
-		if (movements == (*mygame).columns * (*mygame).rows)
+		if (movements == 42)
 		{
 			finish = True;
 		}
